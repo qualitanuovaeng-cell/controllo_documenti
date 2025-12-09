@@ -1,43 +1,403 @@
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Teste Web App Google Sheet</title>
+<title>Visualizzatore di documenti</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgb(217,234,211);
+    margin: 0;
+    padding: 20px;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* LOGO */
+.logo-area {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo-area img {
+    max-height: 150px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+#btnAccesso, #btnRetornar {
+    width: 150px;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: 2px solid black;
+    background-color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* BOTÕES APROVAÇÃO */
+#btnAprovar, #btnReprovar {
+    width: 150px;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: 2px solid black;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+#btnAprovar { background-color: #2e7d32; }
+#btnReprovar { background-color: #c62828; }
+
+/* TELA PRINCIPAL */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1000px;
+    width: 100%;
+    margin-left: 260px;
+    gap: 10px;
+}
+
+h1 { margin: 0; font-size: 28px; }
+
+/* BUSCA */
+.search-wrapper {
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 2px;
+    background-color: white;
+}
+
+#busca {
+    padding: 10px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    background-color: white;
+}
+
+/* TABELA */
+.table-wrapper {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    font-size: 14px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+th {
+    background-color: #e0e0e0;
+    position: sticky;
+    top: 0;
+}
+
+#tabela th:nth-child(1), #tabela td:nth-child(1) { width: 20%; }
+#tabela th:nth-child(2), #tabela td:nth-child(2) { width: 20%; }
+#tabela th:nth-child(3), #tabela td:nth-child(3) { width: 60%; }
+
+tbody tr:nth-child(odd) { background-color: white; }
+tbody tr:nth-child(even) { background-color: rgb(230,245,230); }
+tbody tr:hover { background-color: #a8cfff; }
+
+/* LOGIN */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #e0e0e0;
+    padding: 25px;
+    border-radius: 15px;
+    width: 350px;
+    text-align: center;
+}
+
+.modal-box select,
+.modal-box input {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 2px solid black;
+    box-sizing: border-box;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button-group button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid black;
+    background-color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* PAGINA APROVADOR */
+.pagina-aprovador {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgb(217,234,211);
+    padding: 40px;
+}
+
+.aprovador-container {
+    max-width: 1000px;
+    margin-left: 260px;
+    margin-top: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* COLUNAS TABELA APROVADOR */
+#tabelaAprovador th:nth-child(1),
+#tabelaAprovador td:nth-child(1) { width: 10%; }
+
+#tabelaAprovador th:nth-child(2),
+#tabelaAprovador td:nth-child(2) { width: 15%; }
+
+#tabelaAprovador th:nth-child(3),
+#tabelaAprovador td:nth-child(3) { width: 15%; }
+
+#tabelaAprovador th:nth-child(4),
+#tabelaAprovador td:nth-child(4) { width: 45%; }
+
+#tabelaAprovador th:nth-child(5),
+#tabelaAprovador td:nth-child(5) { width: 15%; }
+
+#tabelaAprovador tbody tr:nth-child(odd){background:white;}
+#tabelaAprovador tbody tr:nth-child(even){background:rgb(230,245,230);}
+#tabelaAprovador tbody tr:hover{background:#a8cfff;}
+
+.checkbox-cell{text-align:center;}
+</style>
 </head>
+
 <body>
-<h2>Teste de envio para Google Sheet</h2>
 
-<input type="text" id="nome" placeholder="Digite um nome">
-<button id="btnEnviar">Enviar</button>
+<div class="logo-area">
+    <img src="Logotipo.png">
+    <button id="btnAccesso">Accesso approvatori</button>
+    <button id="btnRetornar" onclick="logout()" style="display:none;">Ritornare</button>
+</div>
 
-<p id="resposta"></p>
+<!-- TELA 1 -->
+<div class="main-container" id="paginaPrincipal">
+    <h1>Visualizzatore di documenti</h1>
+    <div class="search-wrapper">
+        <input type="text" id="busca" placeholder="Digitare per cercare..." autocomplete="off">
+    </div>
+    <div class="table-wrapper">
+        <table id="tabela">
+            <thead>
+                <tr>
+                    <th>Settore</th>
+                    <th>Tipo</th>
+                    <th>Descrizione</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <h3>Accesso approvatori</h3>
+    <select id="listaUsuarios"><option disabled selected>Utente</option></select>
+    <input type="password" id="senha" placeholder="Password">
+    <div class="button-group">
+        <button onclick="fazerLogin()">Entrare</button>
+        <button onclick="fecharLogin()">Annullare</button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 2 -->
+<div id="paginaAprovador" class="pagina-aprovador">
+    <div class="aprovador-container">
+        <h1>Area approvatori</h1>
+        <p id="userLogado"></p>
+
+        <!-- BOTÕES APENAS NA TELA 2 -->
+        <div style="display:flex; gap:10px; margin:10px 0;">
+            <button id="btnAprovar" onclick="aprovarDocumento()">Approvare</button>
+            <button id="btnReprovar" onclick="reprovarDocumento()">Rifiutare</button>
+        </div>
+
+        <div id="tabelaAprovadorWrapper"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
 
 <script>
-const URL_WEBAPP = "https://script.google.com/macros/s/AKfycby-kkTGnd7AbPbZc8zh6KyLQjqvhiXK5Dkb3PdRQ7dJJ1tYo_cK1ad3Ya12C4yfLKew/exec";
+let dati = [];
 
-document.getElementById("btnEnviar").addEventListener("click", () => {
-    const nome = document.getElementById("nome").value;
-    if(!nome){
-        alert("Digite um nome antes de enviar!");
-        return;
-    }
+function normalize(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]/g," ").toLowerCase();}
+function mapColumns(i){return{Settore:i.Setor||"",Tipo:i.Tipo||"",Descrizione:i.Descricao||"",Link:i.Link||""};}
 
-    const dados = { gravar: nome };
+Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vSNd8ngFjnAI7X8Kwh-uxCveqFJv85CaFcjLD7S8aKSXVITSqyOyCQ9C5y1CIjX8t4uqtt7FFuQ1d7O/pub?output=csv",{download:true,header:true,complete:r=>dati=r.data.map(mapColumns)});
 
-    fetch(URL_WEBAPP, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados)
-    })
-    .then(res => res.json())
-    .then(res => {
-        document.getElementById("resposta").textContent = JSON.stringify(res);
-    })
-    .catch(err => {
-        document.getElementById("resposta").textContent = "Erro de rede ou Fetch: " + err;
-    });
+document.getElementById("busca").addEventListener("keyup",function(){
+ const f=normalize(this.value);
+ if(!f) return updateTable([]);
+ updateTable(dati.filter(i=>normalize(i.Settore).includes(f)||normalize(i.Tipo).includes(f)||normalize(i.Descrizione).includes(f)));
 });
+
+function updateTable(l){
+ const tb=document.querySelector("#tabela tbody");tb.innerHTML="";
+ l.forEach(i=>{
+   const tr=document.createElement("tr");
+   tr.innerHTML=`<td>${i.Settore}</td><td>${i.Tipo}</td><td>${i.Descrizione}</td>`;
+   if(i.Link){
+     let link=i.Link;
+     let id="";
+     if(link.includes("/d/")) id=link.split("/d/")[1].split("/")[0];
+     else if(link.includes("id=")) id=link.split("id=")[1].split("&")[0];
+     if(id) link="https://drive.google.com/file/d/"+id+"/preview";
+     tr.style.cursor="pointer";
+     tr.onclick=()=>window.open(link,"_blank");
+   }
+   tb.appendChild(tr);
+ });
+}
+
+/* LOGIN */
+const URL_ASSISTENTE="https://docs.google.com/spreadsheets/d/e/2PACX-1vSNd8ngFjnAI7X8Kwh-uxCveqFJv85CaFcjLD7S8aKSXVITSqyOyCQ9C5y1CIjX8t4uqtt7FFuQ1d7O/pub?gid=1082523786&single=true&output=csv";
+let cred=[];
+
+Papa.parse(URL_ASSISTENTE,{
+    download:true,
+    header:true,
+    complete:r=>{
+        const s=document.getElementById("listaUsuarios");
+        r.data.forEach(l=>{
+            const usuario = (l.Utente || l.Usuario || Object.values(l)[0] || "").trim();
+            const senha   = (l.Password || l.Senha   || Object.values(l)[1] || "").trim();
+            if(usuario && senha){
+                cred.push({u:usuario,p:senha});
+                const o=document.createElement("option");
+                o.value=usuario;
+                o.textContent=usuario;
+                s.appendChild(o);
+            }
+        });
+    }
+});
+
+document.getElementById("btnAccesso").onclick=()=>{document.getElementById("loginModal").style.display="flex";}
+function fecharLogin(){document.getElementById("loginModal").style.display="none";}
+
+function fazerLogin(){
+ const u=document.getElementById("listaUsuarios").value;
+ const p=document.getElementById("senha").value;
+ const ok=cred.find(x=>x.u===u&&x.p===p);
+ if(ok){
+  document.getElementById("paginaPrincipal").style.display="none";
+  document.getElementById("paginaAprovador").style.display="block";
+  document.getElementById("btnAccesso").style.display="none";
+  document.getElementById("btnRetornar").style.display="block";
+  document.getElementById("loginModal").style.display="none";
+  document.getElementById("userLogado").textContent="Utente: "+u;
+  carregarTabelaAprovador(u);
+ }
+}
+
+function logout(){location.reload();}
+
+/* TABELA 02 */
+function carregarTabelaAprovador(u){
+ const url="https://docs.google.com/spreadsheets/d/e/2PACX-1vSNd8ngFjnAI7X8Kwh-uxCveqFJv85CaFcjLD7S8aKSXVITSqyOyCQ9C5y1CIjX8t4uqtt7FFuQ1d7O/pub?gid=957497978&single=true&output=csv";
+ const w=document.getElementById("tabelaAprovadorWrapper");w.innerHTML="";
+ const tbl=document.createElement("table");
+ tbl.id="tabelaAprovador";
+ tbl.innerHTML=`<thead><tr><th>Sel.</th><th>Settore</th><th>Tipo</th><th>Descrizione</th><th>Nuova Revisione</th></tr></thead><tbody></tbody>`;
+ w.appendChild(tbl);
+
+ Papa.parse(url,{download:true,header:true,complete:r=>{
+  const body=tbl.querySelector("tbody");
+  r.data.filter(i=>i.Step_atual?.trim()===u).forEach(i=>{
+   const tr=document.createElement("tr");
+   tr.innerHTML=`<td class="checkbox-cell"><input type="checkbox"></td><td>${i.Setor||""}</td><td>${i.Tipo||""}</td><td>${i.Descricao||""}</td><td>${i.Nova_Revisao||""}</td>`;
+
+   const cb=tr.querySelector("input");
+   cb.addEventListener("change",()=>{document.querySelectorAll('#tabelaAprovador input').forEach(x=>{if(x!==cb)x.checked=false;});});
+
+   if(i.Link){
+       let link=i.Link;
+       let id="";
+       if(link.includes("/d/")) id=link.split("/d/")[1].split("/")[0];
+       else if(link.includes("id=")) id=link.split("id=")[1].split("&")[0];
+       if(id) link="https://drive.google.com/file/d/"+id+"/preview";
+       tr.style.cursor="pointer";
+       tr.onclick = (e)=>{ if(e.target.type !== "checkbox") window.open(link,"_blank"); };
+   }
+
+   body.appendChild(tr);
+  });
+ }});
+}
+
+/* ETAPA 2.3 - ENVIO PARA WEBAPP */
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbxFebhnNePSZrar0TSdncoEpkwWGCquNKe8CWfEuvJgA_4hHsNKcrJoEzd7u-An93YhiA/exec";
+
+function aprovarDocumento(){processarAcao("APPROVATO");}
+function reprovarDocumento(){processarAcao("RIFIUTATO");}
+
+function processarAcao(status){
+ const selecionado=document.querySelector('#tabelaAprovador input:checked');
+ if(!selecionado){alert("Seleziona un documento");return;}
+ const linha=selecionado.closest("tr");
+ const c=linha.querySelectorAll("td");
+
+ const dados={
+     settore:c[1].textContent,
+     tipo:c[2].textContent,
+     descrizione:c[3].textContent,
+     revisione:c[4].textContent,
+     utente:document.getElementById("userLogado").textContent.replace("Utente: ",""),
+     status:status
+ };
+
+ fetch(URL_WEBAPP,{method:"POST",body:JSON.stringify(dados)})
+ .then(r=>r.text())
+ .then(()=>alert("Operazione completata con successo!"));
+}
 </script>
+
 </body>
 </html>
