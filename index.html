@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste Web App Google Sheets</title>
+</head>
+<body>
+<h2>Teste de envio para Google Sheets</h2>
+
+<input type="text" id="nome" placeholder="Digite um nome">
+<button id="btnEnviar">Enviar</button>
+
+<p id="resposta"></p>
+
+<script>
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbyldmoo31xrVEVLM0CIQpa5uZRzngbV24h0FYWH6dPAmYsEQeWHb78zEUmqlmxu2I9sUA/exec";
+
+document.getElementById("btnEnviar").addEventListener("click", () => {
+    const nome = document.getElementById("nome").value;
+    if(!nome){
+        alert("Digite um nome antes de enviar!");
+        return;
+    }
+
+    const dados = { gravar: nome };
+
+    fetch(URL_WEBAPP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+    })
+    .then(res => res.json())
+    .then(res => {
+        document.getElementById("resposta").textContent = JSON.stringify(res);
+    })
+    .catch(err => {
+        document.getElementById("resposta").textContent = "Erro de rede ou Fetch: " + err;
+    });
+});
+</script>
+</body>
+</html>
